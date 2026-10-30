@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─────────────────────────────────────────────────────────────────────────
+   Palette. Paper and ink with a single signal colour (electric blue). Every colour lives here
+   so the theme toggle only has to flip `data-theme` on <html>.
+
+   The token names (ink, bone, blue, cyan, acid…) predate this palette and are
+   kept because the device mock-ups and /lab are written against them.
+   ───────────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --c-ink: #f2efe8;
+  --c-ink-soft: #e8e4db;
+  --c-line: #d3cec3;
+  --c-bone: #121110;
+  --c-mute: #5f5b53;
+  --c-accent: #006ee6;
+  --c-accent-ink: #0057b8;
+  --c-on-pop: #ffffff;
+  --c-code-str: #004a9e;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  /* Deep navy rather than neutral black, so the blue accent belongs. */
+  --c-ink: #060a14;
+  --c-ink-soft: #0d1426;
+  --c-line: #1c2740;
+  --c-bone: #e9eef8;
+  --c-mute: #8d99b3;
+  --c-accent: #006ee6;
+  --c-accent-ink: #5aa9ff;
+  --c-on-pop: #ffffff;
+  --c-code-str: #8cc4ff;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--c-ink);
+  --color-ink-soft: var(--c-ink-soft);
+  --color-line: var(--c-line);
+  --color-bone: var(--c-bone);
+  --color-mute: var(--c-mute);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-on-pop: var(--c-on-pop);
+  --color-code-str: var(--c-code-str);
+
+  /* Legacy aliases used by DevicePreview and /lab. */
+  --color-blue: var(--c-accent);
+  --color-cyan: var(--c-accent-ink);
+  --color-acid: var(--c-accent);
+
+  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-code), ui-monospace, monospace;
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-marquee-rev: marquee 38s linear infinite reverse;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  80%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--c-on-pop);
+}
+
+/* Section labels: "(02) — Work". */
+.eyebrow {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+}
+
+/* The serif italic that breaks up the grotesk headlines. */
+.serif {
+  font-family: var(--font-instrument), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Paper texture: barely-there noise so the flat background doesn't read as
+   a screen fill. */
+.paper::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .paper::after {
+  mix-blend-mode: screen;
+  opacity: 0.035;
+}
+
+/* Dark mode ambience: a soft blue key light from the top right and a faint
+   cyan fill from the left, both pinned to the viewport. */
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(70rem 40rem at 85% -10%, rgb(0 110 230 / 0.2), transparent 60%),
+    radial-gradient(50rem 32rem at -5% 35%, rgb(34 211 238 / 0.07), transparent 60%),
+    var(--color-ink);
+  background-attachment: fixed;
+}
+
+
+/* Underline that draws in from the left on hover. */
+.link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-draw:hover {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
